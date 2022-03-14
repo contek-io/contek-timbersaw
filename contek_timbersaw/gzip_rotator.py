@@ -1,7 +1,10 @@
 import gzip
+import logging
 import os
 
 from contek_timbersaw.delete_old_rotator import DeleteOldRotator
+
+logger = logging.getLogger(__name__)
 
 
 class GZipRotator:
@@ -13,10 +16,13 @@ class GZipRotator:
         self._delete_old_rotator(source, dest)
         if not os.path.isfile(dest):
             return
-
-        f_in = open(dest, 'rb')
-        f_out = gzip.open("%s.gz" % dest, 'wb')
-        f_out.writelines(f_in)
-        f_out.close()
-        f_in.close()
-        os.remove(dest)
+        gz = "%s.gz" % dest
+        try:
+            f_in = open(dest, 'rb')
+            f_out = gzip.open(gz, 'wb')
+            f_out.writelines(f_in)
+            f_out.close()
+            f_in.close()
+            os.remove(dest)
+        except IOError:
+            logger.exception(f"Failed to compress {dest} into {gz}.")
