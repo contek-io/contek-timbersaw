@@ -48,7 +48,7 @@ def setup():
         utc=True,
     )
     error_file_handler.namer = LogNamer(latest_file)
-    info_file_handler.rotator = DeleteOldRotator(retention_days)
+    error_file_handler.rotator = DeleteOldRotator(retention_days)
     error_file_handler.setFormatter(formatter)
     error_file_handler.setLevel(logging.ERROR)
     logger.addHandler(error_file_handler)

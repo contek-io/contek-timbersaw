@@ -5,4 +5,5 @@ class LogNamer:
         self._extension = extension
 
     def __call__(self, name) -> str:
-        return name.replace(self._original_name, '') + '.' + self._extension
+        prefix = self._original_name + '.'
+        return name.replace(prefix, '') + '.' + self._extension
