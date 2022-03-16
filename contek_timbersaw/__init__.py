@@ -3,7 +3,7 @@ import os
 import sys
 from logging.handlers import TimedRotatingFileHandler
 
-from contek_timbersaw.delete_old_rotator import DeleteOldRotator
+from contek_timbersaw.base_file_rotator import BaseFileRotator
 from contek_timbersaw.gzip_rotator import GZipRotator
 from contek_timbersaw.log_namer import LogNamer
 
@@ -37,6 +37,7 @@ def setup():
         info_dir + '/' + log_latest_file,
         when='midnight',
         utc=True,
+        delay=True,
     )
     info_file_handler.namer = LogNamer(log_latest_file)
     info_file_handler.rotator = GZipRotator(log_retention_days)
@@ -45,12 +46,17 @@ def setup():
     logger.addHandler(info_file_handler)
 
     error_file_handler = TimedRotatingFileHandler(
-        error_dir + '/' + log_latest_file,
+        error_dir,
         when='midnight',
         utc=True,
+        delay=True,
     )
-    error_file_handler.namer = LogNamer(log_latest_file)
-    error_file_handler.rotator = DeleteOldRotator(log_retention_days)
+    error_file_rotator = BaseFileRotator(
+        error_file_handler,
+        log_retention_days,
+    )
+    error_file_rotator.__call__()
+    error_file_handler.rotator = error_file_rotator
     error_file_handler.setFormatter(formatter)
     error_file_handler.setLevel(logging.ERROR)
     logger.addHandler(error_file_handler)

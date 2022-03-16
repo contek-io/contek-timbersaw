@@ -2,7 +2,7 @@ import gzip
 import logging
 import os
 
-from contek_timbersaw.delete_old_rotator import DeleteOldRotator
+from contek_timbersaw.utils import delete_old_files
 
 logger = logging.getLogger(__name__)
 
@@ -10,10 +10,13 @@ logger = logging.getLogger(__name__)
 class GZipRotator:
 
     def __init__(self, retention_days: int) -> None:
-        self._delete_old_rotator = DeleteOldRotator(retention_days)
+        self._retention_days = retention_days
 
     def __call__(self, source: str, dest: str) -> None:
-        self._delete_old_rotator(source, dest)
+        os.rename(source, dest)
+        log_dir = os.path.dirname(dest)
+        delete_old_files(log_dir, self._retention_days)
+
         if not os.path.isfile(dest):
             return
         gz = "%s.gz" % dest
