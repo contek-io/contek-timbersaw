@@ -6,17 +6,21 @@ from contek_timbersaw.timed_rolling_file_handler import TimedRollingFileHandler
 
 
 def setup():
-    logger = logging.getLogger()
-
     log_format = os.getenv(
         'log_format',
-        '%(asctime)s [%(filename)s:%(lineno)d] %(levelname)s: %(message)s',
+        '%(asctime)s %(levelname)s %(filename)s:%(lineno)d - %(message)s',
+    )
+    log_date_format = os.getenv(
+        'log_date_format',
+        '%Y-%m-%dT%H:%M:%S',
     )
     log_root = os.getenv('log_root', os.path.join(os.getcwd(), 'logs'))
     log_rolling = os.getenv('log_rolling', 'MIDNIGHT')
     log_retention_days = int(os.getenv('log_retention_days', '7'))
 
-    formatter = logging.Formatter(log_format)
+    logger = logging.getLogger()
+
+    formatter = logging.Formatter(fmt=log_format, datefmt=log_date_format)
     retention = log_retention_days * 24 * 60 * 60
     stream_handler = logging.StreamHandler()
     stream_handler.setFormatter(formatter)
