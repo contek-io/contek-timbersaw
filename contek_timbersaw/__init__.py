@@ -1,6 +1,7 @@
 import logging.config
 import os
 import sys
+import time
 
 from contek_timbersaw.timed_rolling_file_handler import TimedRollingFileHandler
 
@@ -16,12 +17,14 @@ def setup():
     )
     log_root = os.getenv('log_root', os.path.join(os.getcwd(), 'logs'))
     log_rolling = os.getenv('log_rolling', 'MIDNIGHT')
-    log_retention_days = int(os.getenv('log_retention_days', '7'))
+    log_utc = bool(os.getenv('log_utc', False))
+    log_info_retention_days = int(os.getenv('log_info_retention_days', '14'))
+    log_error_retention_days = int(os.getenv('log_error_retention_days', '28'))
 
     logger = logging.getLogger()
-
     formatter = logging.Formatter(fmt=log_format, datefmt=log_date_format)
-    retention = log_retention_days * 24 * 60 * 60
+    if log_utc:
+        formatter.converter = time.gmtime
     stream_handler = logging.StreamHandler()
     stream_handler.setFormatter(formatter)
     stream_handler.setStream(sys.stdout)
@@ -35,9 +38,9 @@ def setup():
     info_file_handler = TimedRollingFileHandler(
         info_dir,
         compression_format='gz',
-        retention=retention,
+        retention=log_info_retention_days * 24 * 60 * 60,
         when=log_rolling,
-        utc=True,
+        utc=log_utc,
     )
     info_file_handler.setFormatter(formatter)
     info_file_handler.setLevel(logging.INFO)
@@ -47,9 +50,9 @@ def setup():
     os.makedirs(error_dir, exist_ok=True)
     error_file_handler = TimedRollingFileHandler(
         error_dir,
-        retention=retention,
+        retention=log_error_retention_days * 24 * 60 * 60,
         when=log_rolling,
-        utc=True,
+        utc=log_utc,
     )
     error_file_handler.setFormatter(formatter)
     error_file_handler.setLevel(logging.ERROR)
