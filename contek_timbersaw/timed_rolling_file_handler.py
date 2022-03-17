@@ -1,7 +1,7 @@
 import os
 import time
 from logging.handlers import TimedRotatingFileHandler
-from typing import TextIO, Optional
+from typing import Optional
 
 from contek_timbersaw.async_compressor import AsyncCompressor
 from contek_timbersaw.async_deleter import AsyncDeleter
@@ -18,7 +18,7 @@ class TimedRollingFileHandler(TimedRotatingFileHandler):
         **kwargs,
     ) -> None:
         super().__init__(log_dir, delay=True, **kwargs)
-        self._current_file: Optional[str] = None
+        self._log_dir = log_dir
         self._file_suffix = file_suffix
         self._compress = AsyncCompressor(compression_format)
         self._delete = AsyncDeleter(log_dir, retention)
@@ -58,20 +58,11 @@ class TimedRollingFileHandler(TimedRotatingFileHandler):
         else:
             time_tuple = time.localtime()
 
-        log_dir = self.baseFilename
         time_str = time.strftime(self.suffix, time_tuple)
         file_name = time_str + self._file_suffix
-        new_file = os.path.join(log_dir, file_name)
-        if self._current_file is not None:
-            if new_file == self._current_file:
+        new_file = os.path.join(self._log_dir, file_name)
+        if self.baseFilename is not None:
+            if new_file == self.baseFilename:
                 return
-            self._compress(self._current_file)
-        self._current_file = new_file
-
-    def _open(self) -> TextIO:
-        return open(
-            self._current_file,
-            self.mode,
-            encoding=self.encoding,
-            errors=self.errors,
-        )
+            self._compress(self.baseFilename)
+        self.baseFilename = new_file
