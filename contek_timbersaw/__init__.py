@@ -1,11 +1,8 @@
 import logging.config
 import os
 import sys
-from logging.handlers import TimedRotatingFileHandler
 
-from contek_timbersaw.base_file_rotator import BaseFileRotator
-from contek_timbersaw.gzip_rotator import GZipRotator
-from contek_timbersaw.log_namer import LogNamer
+from contek_timbersaw.timed_rolling_file_handler import TimedRollingFileHandler
 
 
 def setup():
@@ -15,11 +12,12 @@ def setup():
         'log_format',
         '%(asctime)s [%(filename)s:%(lineno)d] %(levelname)s: %(message)s',
     )
-    log_root = os.getenv('log_root', os.getcwd() + '/logs')
-    log_latest_file = os.getenv('log_latest_file', 'latest.log')
+    log_root = os.getenv('log_root', os.path.join(os.getcwd(), 'logs'))
+    log_rolling = os.getenv('log_rolling', 'MIDNIGHT')
     log_retention_days = int(os.getenv('log_retention_days', '7'))
 
     formatter = logging.Formatter(log_format)
+    retention = log_retention_days * 24 * 60 * 60
     stream_handler = logging.StreamHandler()
     stream_handler.setFormatter(formatter)
     stream_handler.setStream(sys.stdout)
@@ -28,35 +26,27 @@ def setup():
     logger.setLevel(logging.INFO)
     logger.propagate = True
 
-    info_dir = log_root + '/info'
+    info_dir = os.path.join(log_root, 'info')
     os.makedirs(info_dir, exist_ok=True)
-    error_dir = log_root + '/error'
-    os.makedirs(error_dir, exist_ok=True)
-
-    info_file_handler = TimedRotatingFileHandler(
-        info_dir + '/' + log_latest_file,
-        when='midnight',
+    info_file_handler = TimedRollingFileHandler(
+        info_dir,
+        compression_format='gz',
+        retention=retention,
+        when=log_rolling,
         utc=True,
-        delay=True,
     )
-    info_file_handler.namer = LogNamer(log_latest_file)
-    info_file_handler.rotator = GZipRotator(log_retention_days)
     info_file_handler.setFormatter(formatter)
     info_file_handler.setLevel(logging.INFO)
     logger.addHandler(info_file_handler)
 
-    error_file_handler = TimedRotatingFileHandler(
+    error_dir = os.path.join(log_root, 'error')
+    os.makedirs(error_dir, exist_ok=True)
+    error_file_handler = TimedRollingFileHandler(
         error_dir,
-        when='midnight',
+        retention=retention,
+        when=log_rolling,
         utc=True,
-        delay=True,
     )
-    error_file_rotator = BaseFileRotator(
-        error_file_handler,
-        log_retention_days,
-    )
-    error_file_rotator.__call__()
-    error_file_handler.rotator = error_file_rotator
     error_file_handler.setFormatter(formatter)
     error_file_handler.setLevel(logging.ERROR)
     logger.addHandler(error_file_handler)
