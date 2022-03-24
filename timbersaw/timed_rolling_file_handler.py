@@ -3,18 +3,18 @@ import time
 from logging.handlers import TimedRotatingFileHandler
 from typing import Optional
 
-from contek_timbersaw.async_compressor import AsyncCompressor
-from contek_timbersaw.async_deleter import AsyncDeleter
+from timbersaw.async_compressor import AsyncCompressor
+from timbersaw.async_deleter import AsyncDeleter
 
 
 class TimedRollingFileHandler(TimedRotatingFileHandler):
 
     def __init__(
-        self,
-        log_dir: str,
-        file_suffix: str = '.log',
-        compression_format: Optional[str] = None,
-        retention: int = 0,
+            self,
+            log_dir: str,
+            file_suffix: str = '.log',
+            compression_format: Optional[str] = None,
+            retention: int = 0,
         **kwargs,
     ) -> None:
         super().__init__(log_dir, delay=True, **kwargs)
