@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 logger.info('foo bar')
 ```
 
-### 2. Default Result
+### 2. Results
 
 **INFO** level logging will be written to:
 
@@ -40,7 +40,7 @@ When an **INFO** log file passes its active period (defaults to when a new day s
 
 #### Retention
 
-Old logs will be deleted after their retention period. By default, **INFO** logs are kept for 14 days. **ERROR** logs
+Old logs will be deleted after their retention period. By default, **INFO** logs are kept for 14 days and **ERROR** logs
 are kept for 28 days.
 
 ### 4. Default Settings
