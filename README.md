@@ -6,7 +6,7 @@
 
 ```python
 import logging
-import timbersaw
+import contek_timbersaw as timbersaw
 
 timbersaw.setup()
 logger = logging.getLogger(__name__)

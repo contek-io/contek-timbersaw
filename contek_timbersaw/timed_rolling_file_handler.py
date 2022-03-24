@@ -3,8 +3,8 @@ import time
 from logging.handlers import TimedRotatingFileHandler
 from typing import Optional
 
-from timbersaw.async_compressor import AsyncCompressor
-from timbersaw.async_deleter import AsyncDeleter
+from contek_timbersaw.async_compressor import AsyncCompressor
+from contek_timbersaw.async_deleter import AsyncDeleter
 
 
 class TimedRollingFileHandler(TimedRotatingFileHandler):

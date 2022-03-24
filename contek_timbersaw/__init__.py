@@ -3,7 +3,7 @@ import os
 import sys
 import time
 
-from timbersaw.timed_rolling_file_handler import TimedRollingFileHandler
+from contek_timbersaw.timed_rolling_file_handler import TimedRollingFileHandler
 
 
 def setup():

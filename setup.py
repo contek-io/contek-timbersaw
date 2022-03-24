@@ -16,7 +16,7 @@ setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
-    py_modules=["timbersaw"],
+    py_modules=["contek_timbersaw"],
     url='https://github.com/contek-io/contek-timbersaw',
     author='contek_bjy',
     author_email='bjy@contek.io',
