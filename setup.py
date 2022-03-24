@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name='timbersaw',
+    name='contek-timbersaw',
     version='1.0',
     description='Timbersaw for automatic logging configuration',
     long_description=long_description,
@@ -17,7 +17,7 @@ setup(
     ],
     python_requires='>=3.6',
     py_modules=["timbersaw"],
-    url='https://contek.io',
+    url='https://github.com/contek-io/contek-timbersaw',
     author='contek_bjy',
     author_email='bjy@contek.io',
     license='MIT',
