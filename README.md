@@ -87,12 +87,6 @@ False
 28
 ```
 
-#### log_utc
-
-```
-False
-```
-
 ### 5. Customization
 
 Settings are configurable via environment properties. They can be set before your program starts using ``export``. For
