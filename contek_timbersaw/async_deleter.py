@@ -1,9 +1,11 @@
 import logging
+import multiprocessing
 import os
 import time
 from concurrent.futures import ThreadPoolExecutor
 
 logger = logging.getLogger(__name__)
+deleter_lock = multiprocessing.Lock()
 
 
 class AsyncDeleter:
@@ -22,6 +24,8 @@ class AsyncDeleter:
         self._executor.submit(self._del, min_modified_time)
 
     def _del(self, min_modified_time: int) -> None:
+        deleter_lock.acquire()
+
         try:
             for f in os.listdir(self._log_dir):
                 file_path = os.path.join(self._log_dir, f)
@@ -32,6 +36,8 @@ class AsyncDeleter:
                 last_modified = stats.st_mtime
                 if last_modified < min_modified_time:
                     os.remove(file_path)
-        except IOError:
-            logger.error(
+        except (FileNotFoundError, IOError):
+            logger.exception(
                 f"Failed to delete files modified before {min_modified_time}.")
+        finally:
+            deleter_lock.release()

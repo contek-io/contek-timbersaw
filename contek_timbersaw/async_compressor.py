@@ -2,10 +2,12 @@ import bz2
 import gzip
 import logging
 import lzma
+import multiprocessing
 import os
 from concurrent.futures import ThreadPoolExecutor
 
 logger = logging.getLogger(__name__)
+compressor_lock = multiprocessing.Lock()
 
 
 class AsyncCompressor:
@@ -39,12 +41,19 @@ class AsyncCompressor:
         self._executor.submit(self._gz, source, dest)
 
     def _gz(self, source: str, dest: str) -> None:
+        compressor_lock.acquire()
+
         try:
+            if not os.path.isfile(source):
+                return
+
             f_in = open(source, 'rb')
             f_out = self._open_out(dest, 'wb')
             f_out.writelines(f_in)
             f_out.close()
             f_in.close()
             os.remove(source)
-        except IOError:
+        except (FileNotFoundError, IOError):
             logger.exception(f"Failed to compress {source} into {dest}.")
+        finally:
+            compressor_lock.release()
