@@ -44,9 +44,6 @@ class AsyncCompressor:
         compressor_lock.acquire()
 
         try:
-            if not os.path.isfile(source):
-                return
-
             f_in = open(source, 'rb')
             f_out = self._open_out(dest, 'wb')
             f_out.writelines(f_in)
