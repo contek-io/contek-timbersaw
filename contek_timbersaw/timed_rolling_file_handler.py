@@ -27,6 +27,7 @@ class TimedRollingFileHandler(TimedRotatingFileHandler):
     def doRollover(self):
         self.close()
         self._update_current_file()
+        self._delete()
         self._calculate_new_rollover_at()
 
     def _calculate_new_rollover_at(self) -> None:
