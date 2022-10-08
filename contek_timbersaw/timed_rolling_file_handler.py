@@ -4,7 +4,7 @@ from logging.handlers import TimedRotatingFileHandler
 from typing import Optional
 
 from contek_timbersaw.async_compressor import AsyncCompressor
-from contek_timbersaw.async_deleter import AsyncDeleter
+from contek_timbersaw.deleter import Deleter
 
 
 class TimedRollingFileHandler(TimedRotatingFileHandler):
@@ -21,7 +21,7 @@ class TimedRollingFileHandler(TimedRotatingFileHandler):
         self._log_dir = log_dir
         self._file_suffix = file_suffix
         self._compress = AsyncCompressor(compression_format)
-        self._delete = AsyncDeleter(log_dir, retention)
+        self._delete = Deleter(log_dir, retention)
         self._delete()
         self._update_current_file()
 

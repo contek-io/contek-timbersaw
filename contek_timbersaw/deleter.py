@@ -7,7 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 logger = logging.getLogger(__name__)
 deleter_lock = multiprocessing.Lock()
 
-class AsyncDeleter:
+class Deleter:
 
     def __init__(self, log_dir: str, retention: int) -> None:
         self._executor = ThreadPoolExecutor(1)
