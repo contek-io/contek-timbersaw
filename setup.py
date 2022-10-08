@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='contek-timbersaw',
-    version='2.3',
+    version='2.4',
     description='Timbersaw for automatic logging configuration',
     long_description=long_description,
     long_description_content_type="text/markdown",
