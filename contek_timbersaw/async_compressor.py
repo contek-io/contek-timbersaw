@@ -7,7 +7,7 @@ import os
 from concurrent.futures import ThreadPoolExecutor
 
 logger = logging.getLogger(__name__)
-compressor_lock = multiprocessing.Lock()
+log_file_lock = multiprocessing.Lock()
 
 
 class AsyncCompressor:
@@ -41,7 +41,7 @@ class AsyncCompressor:
         self._executor.submit(self._gz, source, dest)
 
     def _gz(self, source: str, dest: str) -> None:
-        compressor_lock.acquire()
+        log_file_lock.acquire()
 
         try:
             if os.path.isfile(source):
@@ -54,4 +54,4 @@ class AsyncCompressor:
         except (FileNotFoundError, IOError):
             logger.exception(f"Failed to compress {source} into {dest}.")
         finally:
-            compressor_lock.release()
+            log_file_lock.release()
