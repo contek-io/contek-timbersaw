@@ -15,19 +15,20 @@ class TimedRollingFileHandler(TimedRotatingFileHandler):
             file_suffix: str = '.log',
             compression_format: Optional[str] = None,
             retention: int = 0,
-        **kwargs,
+            **kwargs,
     ) -> None:
         super().__init__(log_dir, delay=True, **kwargs)
         self._log_dir = log_dir
         self._file_suffix = file_suffix
         self._compress = AsyncCompressor(compression_format)
         self._delete = AsyncDeleter(log_dir, retention)
+        self._delete()
         self._update_current_file()
 
     def doRollover(self):
         self.close()
-        self._update_current_file()
         self._delete()
+        self._update_current_file()
         self._calculate_new_rollover_at()
 
     def _calculate_new_rollover_at(self) -> None:
