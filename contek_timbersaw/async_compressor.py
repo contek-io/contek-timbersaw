@@ -41,17 +41,14 @@ class AsyncCompressor:
         self._executor.submit(self._gz, source, dest)
 
     def _gz(self, source: str, dest: str) -> None:
-        compressor_lock.acquire()
-
-        try:
-            if os.path.isfile(source):
-                f_in = open(source, 'rb')
-                f_out = self._open_out(dest, 'wb')
-                f_out.writelines(f_in)
-                f_out.close()
-                f_in.close()
-                os.remove(source)
-        except (FileNotFoundError, IOError):
-            logger.exception(f"Failed to compress {source} into {dest}.")
-        finally:
-            compressor_lock.release()
+        with compressor_lock:
+            try:
+                if os.path.isfile(source):
+                    f_in = open(source, 'rb')
+                    f_out = self._open_out(dest, 'wb')
+                    f_out.writelines(f_in)
+                    f_out.close()
+                    f_in.close()
+                    os.remove(source)
+            except (FileNotFoundError, IOError):
+                logger.exception(f"Failed to compress {source} into {dest}.")
