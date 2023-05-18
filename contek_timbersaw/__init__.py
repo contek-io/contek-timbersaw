@@ -19,7 +19,7 @@ def setup():
     log_rolling = os.getenv('log_rolling', 'MIDNIGHT')
     log_utc = bool(os.getenv('log_utc', False))
     log_info_retention_days = int(os.getenv('log_info_retention_days', '7'))
-    log_warn_retention_days = int(os.getenv('log_error_retention_days', '14'))
+    log_warn_retention_days = int(os.getenv('log_warn_retention_days', '14'))
     log_error_retention_days = int(os.getenv('log_error_retention_days', '28'))
 
     logger = logging.getLogger()
