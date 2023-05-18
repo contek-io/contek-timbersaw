@@ -33,13 +33,13 @@ def setup():
     logger.setLevel(logging.INFO)
     logger.propagate = True
 
-    def add_handler(level, retention):
+    def add_handler(level, retention_days, compression_format='gz'):
         file_dir = os.path.join(log_root, level)
         os.makedirs(file_dir, exist_ok=True)
         handler = TimedRollingFileHandler(
             file_dir,
-            compression_format='gz',
-            retention=retention * 24 * 60 * 60,
+            compression_format=compression_format,
+            retention=retention_days * 24 * 60 * 60,
             when=log_rolling,
             utc=log_utc,
         )
