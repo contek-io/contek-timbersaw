@@ -20,6 +20,7 @@ def setup():
     log_utc = bool(os.getenv('log_utc', False))
     log_info_retention_days = int(os.getenv('log_info_retention_days', '14'))
     log_error_retention_days = int(os.getenv('log_error_retention_days', '28'))
+    log_warn_retention_days = int(os.getenv('log_error_retention_days', '14'))
 
     logger = logging.getLogger()
     formatter = logging.Formatter(fmt=log_format, datefmt=log_date_format)
@@ -57,6 +58,19 @@ def setup():
     error_file_handler.setFormatter(formatter)
     error_file_handler.setLevel(logging.ERROR)
     logger.addHandler(error_file_handler)
+
+
+    warn_dir = os.path.join(log_root, 'warn')
+    os.makedirs(warn_dir, exist_ok=True)
+    warn_file_handler = TimedRollingFileHandler(
+        warn_dir,
+        retention=log_warn_retention_days * 24 * 60 * 60,
+        when=log_rolling,
+        utc=log_utc,
+    )
+    warn_file_handler.setFormatter(formatter)
+    warn_file_handler.setLevel(logging.WARN)
+    logger.addHandler(warn_file_handler)
 
     def handle_exception(exc_type, exc_value, exc_traceback) -> None:
         if issubclass(exc_type, KeyboardInterrupt):
