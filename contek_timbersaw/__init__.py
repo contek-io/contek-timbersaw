@@ -33,7 +33,7 @@ def setup():
     logger.setLevel(logging.INFO)
     logger.propagate = True
 
-    def add_handler(level, retention_days, compression_format='gz'):
+    def add_file_handler(level, retention_days, compression_format=None):
         file_dir = os.path.join(log_root, level)
         os.makedirs(file_dir, exist_ok=True)
         handler = TimedRollingFileHandler(
@@ -47,9 +47,9 @@ def setup():
         handler.setLevel(logging.getLevelNamesMapping()[level])
         logger.addHandler(handler)
 
-    add_handler('INFO', log_info_retention_days)
-    add_handler('WARN', log_warn_retention_days)
-    add_handler('ERROR', log_error_retention_days)
+    add_file_handler('INFO', log_info_retention_days, 'gz')
+    add_file_handler('WARN', log_warn_retention_days)
+    add_file_handler('ERROR', log_error_retention_days)
 
     def handle_exception(exc_type, exc_value, exc_traceback) -> None:
         if issubclass(exc_type, KeyboardInterrupt):
