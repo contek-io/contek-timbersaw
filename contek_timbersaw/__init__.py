@@ -34,7 +34,7 @@ def setup():
     logger.propagate = True
 
     def add_file_handler(level, retention_days, compression_format=None):
-        file_dir = os.path.join(log_root, level)
+        file_dir = os.path.join(log_root, level.lower())
         os.makedirs(file_dir, exist_ok=True)
         handler = TimedRollingFileHandler(
             file_dir,
