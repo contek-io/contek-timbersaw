@@ -44,7 +44,11 @@ def setup():
             utc=log_utc,
         )
         handler.setFormatter(formatter)
-        handler.setLevel(logging.getLevelNamesMapping()[level])
+
+        if sys.version_info >= (3, 11):
+            handler.setLevel(logging.getLevelNamesMapping()[level])
+        else:
+            handler.setLevel(getattr(logging, level))
         logger.addHandler(handler)
 
     add_file_handler('INFO', log_info_retention_days, 'gz')
