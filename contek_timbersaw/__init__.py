@@ -45,7 +45,6 @@ def setup():
             utc=log_utc,
         )
         handler.setFormatter(formatter)
-
         handler.setLevel(level)
         logger.addHandler(handler)
 
