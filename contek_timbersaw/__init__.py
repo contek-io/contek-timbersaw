@@ -2,6 +2,7 @@ import logging.config
 import os
 import sys
 import time
+from typing import Optional
 
 from contek_timbersaw.timed_rolling_file_handler import TimedRollingFileHandler
 
@@ -33,8 +34,8 @@ def setup():
     logger.setLevel(logging.INFO)
     logger.propagate = True
 
-    def add_file_handler(level, retention_days, compression_format=None):
-        file_dir = os.path.join(log_root, level.lower())
+    def add_file_handler(level: int, retention_days: int, compression_format: Optional[str] = None):
+        file_dir = os.path.join(log_root, logging.getLevelName(level).lower())
         os.makedirs(file_dir, exist_ok=True)
         handler = TimedRollingFileHandler(
             file_dir,
@@ -44,12 +45,12 @@ def setup():
             utc=log_utc,
         )
         handler.setFormatter(formatter)
-        handler.setLevel(logging.getLevelNamesMapping()[level])
+        handler.setLevel(level)
         logger.addHandler(handler)
 
-    add_file_handler('INFO', log_info_retention_days, 'gz')
-    add_file_handler('WARN', log_warn_retention_days)
-    add_file_handler('ERROR', log_error_retention_days)
+    add_file_handler(logging.INFO, log_info_retention_days, 'gz')
+    add_file_handler(logging.WARN, log_warn_retention_days)
+    add_file_handler(logging.ERROR, log_error_retention_days)
 
     def handle_exception(exc_type, exc_value, exc_traceback) -> None:
         if issubclass(exc_type, KeyboardInterrupt):
