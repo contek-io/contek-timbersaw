@@ -5,6 +5,7 @@ import time
 from typing import Optional
 
 from contek_timbersaw.timed_rolling_file_handler import TimedRollingFileHandler
+from loguru import logger
 
 
 def setup():
@@ -63,3 +64,43 @@ def setup():
         )
 
     sys.excepthook = handle_exception
+
+
+def loguru_setup():
+    log_format = os.getenv(
+        'log_format',
+        '[{time:YYYY-MM-DDTHH:mm:ss.SSSZZ}] [{file}:{line}] [{level}] {message}',
+    )
+    log_root = os.getenv('log_root', os.path.join(os.getcwd(), 'logs'))
+    
+    logger.remove()
+    logger.add(sys.stderr, format=log_format, level="INFO")
+
+    log_info_retention_days = int(os.getenv('log_info_retention_days', '7'))
+    log_warn_retention_days = int(os.getenv('log_warn_retention_days', '14'))
+    log_error_retention_days = int(os.getenv('log_error_retention_days', '28'))
+    
+    logger.add(
+        level="INFO",
+        sink=os.path.join(log_root, "info", "info.log"),
+        format=log_format,
+        rotation="1d",
+        retention=str(log_info_retention_days) + "d",
+        compression='gz',
+    )
+
+    logger.add(
+        level="WARNING",
+        sink=os.path.join(log_root, "warning", "warning.log"),
+        format=log_format,
+        rotation="1d",
+        retention=str(log_warn_retention_days) + "d",
+    )
+
+    logger.add(
+        level="ERROR",
+        sink=os.path.join(log_root, "error", "error.log"),
+        format=log_format,
+        rotation="1d",
+        retention=str(log_error_retention_days) + "d",
+    )
