@@ -52,22 +52,29 @@ class HeartbeatLoggger(LoggingModule):
         self.task = task
         self.interval = interval
         self.sequence = 0
-        self.lock = threading.Lock()
 
     def one_beat(self):
-        self.lock.acquire()
         self.logger.info(f"[{self.task}] [{self.interval}] [{self.sequence}]")
         self.sequence += 1
-        self.lock.release()
 
     def timer_beat(self):
-        while True:
+        interval_seconds = int(pd.Timedelta(self.interval).total_seconds())
+        while not self.stop_flag:
             self.one_beat()
-            time.sleep(pd.Timedelta(self.interval).total_seconds())
+            for _ in range(interval_seconds):
+                if not self.stop_flag:
+                    time.sleep(1)  
+                else:
+                    break
 
     def start(self):
-        thread = threading.Thread(target=self.timer_beat)
-        thread.start()
+        self.thread = threading.Thread(target=self.timer_beat, daemon=True)
+        self.stop_flag = False
+        self.thread.start()
+
+    def stop(self):
+        self.stop_flag = True
+        self.thread.join()
 
 
 class JsonLogger(LoggingModule):
@@ -87,12 +94,16 @@ class JsonLogger(LoggingModule):
         serialized = json.dumps({**record_cp})
         record["extra"]["serialized"] = serialized
 
+    def bind(self, **kwargs):
+        self.logger = self.logger.bind(**kwargs)
+        
     def log(self, **kwargs):
-        self.logger.bind(**kwargs).patch(JsonLogger.serializer).info(f"{kwargs}")
+        level = kwargs.pop("level", "INFO")
+        self.logger.bind(**kwargs).patch(JsonLogger.serializer).log(level, f"{kwargs}")
 
 
 if __name__ == "__main__":
-    heartbeat_logger = HeartbeatLoggger("heartbeat.log", "task", "5s")
+    heartbeat_logger = HeartbeatLoggger("heartbeat.log", "task", "2s")
     heartbeat_logger.one_beat()
     heartbeat_logger.update(task="task007")
     heartbeat_logger.one_beat()
@@ -102,5 +113,14 @@ if __name__ == "__main__":
     json_logger.log(json=True, a=1, b=2, c="c", d=1.2)
 
     with json_logger.logger.contextualize(category="111111"):
-        json_logger.log(cnt=1)
-    json_logger.log(cnt=2)
+        json_logger.log(level="WARNING", cnt=1)
+    json_logger.log(level="ERROR", cnt=2)
+
+    time.sleep(2)
+    heartbeat_logger.stop()
+    heartbeat_logger.update(interval="3s")
+    heartbeat_logger.start()
+
+    time.sleep(4)
+    heartbeat_logger.stop()
+    time.sleep(3)
