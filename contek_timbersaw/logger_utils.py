@@ -52,8 +52,6 @@ class HeartbeatLoggger(LoggingModule):
         self.task = task
         self.interval = interval
         self.sequence = 0
-        self.thread = threading.Thread(target=self.timer_beat, daemon=True)
-        self.stop_flag = False
 
     def one_beat(self):
         self.logger.info(f"[{self.task}] [{self.interval}] [{self.sequence}]")
@@ -70,6 +68,8 @@ class HeartbeatLoggger(LoggingModule):
                     break
 
     def start(self):
+        self.thread = threading.Thread(target=self.timer_beat, daemon=True)
+        self.stop_flag = False
         self.thread.start()
 
     def stop(self):
@@ -115,6 +115,12 @@ if __name__ == "__main__":
     with json_logger.logger.contextualize(category="111111"):
         json_logger.log(level="WARNING", cnt=1)
     json_logger.log(level="ERROR", cnt=2)
-    time.sleep(5)
+
+    time.sleep(2)
     heartbeat_logger.stop()
-    time.sleep(5)
+    heartbeat_logger.update(interval="3s")
+    heartbeat_logger.start()
+
+    time.sleep(4)
+    heartbeat_logger.stop()
+    time.sleep(3)
