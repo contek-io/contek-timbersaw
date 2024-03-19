@@ -87,8 +87,12 @@ class JsonLogger(LoggingModule):
         serialized = json.dumps({**record_cp})
         record["extra"]["serialized"] = serialized
 
+    def bind(self, **kwargs):
+        self.logger = self.logger.bind(**kwargs)
+        
     def log(self, **kwargs):
-        self.logger.bind(**kwargs).patch(JsonLogger.serializer).info(f"{kwargs}")
+        level = kwargs.pop("level", "INFO")
+        self.logger.bind(**kwargs).patch(JsonLogger.serializer).log(level, f"{kwargs}")
 
 
 if __name__ == "__main__":
@@ -102,5 +106,5 @@ if __name__ == "__main__":
     json_logger.log(json=True, a=1, b=2, c="c", d=1.2)
 
     with json_logger.logger.contextualize(category="111111"):
-        json_logger.log(cnt=1)
-    json_logger.log(cnt=2)
+        json_logger.log(level="WARNING", cnt=1)
+    json_logger.log(level="ERROR", cnt=2)
