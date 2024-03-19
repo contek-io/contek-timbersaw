@@ -113,4 +113,4 @@ if __name__ == "__main__":
         json_logger.log(level="WARNING", cnt=1)
     json_logger.log(level="ERROR", cnt=2)
     time.sleep(10)
-    heartbeat_logger.stop_flag = True
+    heartbeat_logger.stop()
