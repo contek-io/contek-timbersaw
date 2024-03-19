@@ -51,28 +51,31 @@ class HeartbeatLoggger(LoggingModule):
         super().__init__(path, format, rotation, retention)
         self.task = task
         self.interval = interval
-        self.interval_seconds = pd.Timedelta(interval).total_seconds()
         self.sequence = 0
-        self.lock = threading.Lock()
+        self.thread = threading.Thread(target=self.timer_beat, daemon=True)
         self.stop_flag = False
 
     def one_beat(self):
-        self.lock.acquire()
         self.logger.info(f"[{self.task}] [{self.interval}] [{self.sequence}]")
         self.sequence += 1
-        self.lock.release()
 
     def timer_beat(self):
+        interval_seconds = int(pd.Timedelta(self.interval).total_seconds())
         while not self.stop_flag:
             self.one_beat()
-            time.sleep(self.interval_seconds)
+            for _ in range(interval_seconds):
+                if not self.stop_flag:
+                    time.sleep(1)  
+                else:
+                    break
 
     def start(self):
-        thread = threading.Thread(target=self.timer_beat)
-        thread.start()
+        self.thread.start()
 
     def stop(self):
         self.stop_flag = True
+        self.thread.join()
+
 
 class JsonLogger(LoggingModule):
     def __init__(
@@ -112,5 +115,6 @@ if __name__ == "__main__":
     with json_logger.logger.contextualize(category="111111"):
         json_logger.log(level="WARNING", cnt=1)
     json_logger.log(level="ERROR", cnt=2)
-    time.sleep(10)
+    time.sleep(5)
     heartbeat_logger.stop()
+    time.sleep(5)
